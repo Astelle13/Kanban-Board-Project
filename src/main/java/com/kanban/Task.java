@@ -1,7 +1,7 @@
 package com.kanban;
 
 public class Task{
-    private staticint nextId = 1; // simple auto-ID generator
+    private static int nextId = 1; // simple auto-ID generator
     private int id;
     private String Title;
     private String description;
@@ -20,13 +20,13 @@ public class Task{
 
     public Task(String tit, String desc, String assign){
         id = nextId++;
-        if(tit == null || desc.trin().equals("")){
+        if(tit == null || desc.trim().equals("")){
             Title = "Untitled Task";
         } else {
             Title = tit;
         }
 
-        if(desc == null || desc.trin().equals("")){
+        if(desc == null || desc.trim().equals("")){
             description = "Enter description";
         } else{
             description = desc;

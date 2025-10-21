@@ -51,7 +51,7 @@ public class Stage{
     public void showAllTasks() {
         System.out.println("=== "+ name+ " ===");
         if(count == 0){
-            System.out.println("No tasks here yet.\n);
+            System.out.println("No tasks here yet.\n");
             return;
         }
         for(int i=0; i<count; i++){
@@ -60,6 +60,6 @@ public class Stage{
     }
 
     public int getTaskCount(){
-        return coun;
+        return count;
     }
 }
