@@ -196,7 +196,7 @@ public class main {  // Fixed class name to follow Java conventions
                     Task removedTask = srcStage.removeTaskAtIndex(moveIndex);
                     destStage.addTask(removedTask);
 
-                    System.out.println("✅ Task '" + removedTask.getTitle() + "' moved from " + srcStage.getName() + " to " + destStage.getName() + ".");
+                    System.out.println("Task '" + removedTask.getTitle() + "' moved from " + srcStage.getName() + " to " + destStage.getName() + ".");
                     break;
 
                 case 5:
