@@ -1,85 +1,49 @@
 package com.kanban;
 
-public class Task{
-    private static int nextId = 1; // simple auto-ID generator
-    private int id;
-    private String Title;
+import java.util.Arrays;
+
+public class Task {
+    private String title;
     private String description;
-    private String priority; // High, Medium, Low
     private String assignee;
-    private String status; // TO-DO, PROGRESS, DONE
+    private String priority;  // New field: "High", "Medium", "Low"
 
-    public Task(){
-        id = nextId++;
-        Title = "";
-        description = "";
-        priority = "Low";
-        assignee = "Unassigned";
-        status = "TO-DO";
+    // Existing no-arg constructor
+    public Task() {}
+
+    // Existing constructor
+    public Task(String title, String description, String assignee) {
+        this.title = title;
+        this.description = description;
+        this.assignee = assignee;
+        this.priority = "Medium";  // Default
     }
 
-    public Task(String tit, String desc, String assign){
-        id = nextId++;
-        if(tit == null || desc.trim().equals("")){
-            Title = "Untitled Task";
-        } else {
-            Title = tit;
+    // New constructor with priority
+    public Task(String title, String description, String assignee, String priority) {
+        this.title = title;
+        this.description = description;
+        this.assignee = assignee;
+        setPriority(priority);  // Use setter for validation
+    }
+
+    // Getters
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public String getAssignee() { return assignee; }
+    public String getPriority() { return priority; }
+
+    // Setter for priority with validation
+    public void setPriority(String priority) {
+        if (!Arrays.asList("High", "Medium", "Low").contains(priority)) {
+            throw new IllegalArgumentException("Priority must be High, Medium, or Low.");
         }
-
-        if(desc == null || desc.trim().equals("")){
-            description = "Enter description";
-        } else{
-            description = desc;
-        }
-
-        if(assign == null || assign.trim().equals("")){
-            assignee = "Unassigned";
-        } else{
-            assignee = assign;
-        }
-
-        priority = "Low";
-        status = "TO-DO";
+        this.priority = priority;
     }
 
-    public int getId(){
-        return id;
-    }
-
-    public String getTitle(){
-        return Title;
-    }
-
-    public String getDescription(){
-        return description;
-    }
-
-    public String getPriority(){
-        return priority;
-    }
-
-    public String getAssignee(){
-        return assignee;
-    }
-
-    public String getStatus(){
-        return status;
-    }
-
-    public void setPriority(String newPriority){
-        priority = newPriority;
-    }
-
-    public void setStatus(String newStatus){
-        status = newStatus;
-    }
-
-    public void displayTask() {
-        System.out.println("Task ID: "+ id);
-        System.out.println("Title: "+ Title);
-        System.out.println("Description: "+ description);
-        System.out.println("Priority: "+ priority);
-        System.out.println("Assignee: "+ assignee);
-        System.out.println("Status: "+ status);
+    // Assume toString or other methods exist; update if needed for display
+    @Override
+    public String toString() {
+        return title + " - " + description + " - " + assignee + " (Priority: " + priority + ")";
     }
 }
