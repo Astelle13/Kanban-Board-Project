@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Board Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Kanban Board Manager</h1>
+        <p>Manage your Agile workflows</p>
+    </header>
+    <main>
+        <section class="actions">
+            <button onclick="openCreateModal()" class="btn-primary">+ Create New Board</button>
+            <button onclick="refreshBoards()" class="btn-secondary">Refresh</button>
+        </section>
+        <section class="board-list" id="boardList">
+            <p>Loading boards...</p>
+        </section>
+    </main>
+    <!-- Create Board Modal -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <h2>Create Board</h2>
+            <input type="text" id="boardName" placeholder="Board name" required>
+            <div class="modal-buttons">
+                <button onclick="createBoard()" class="btn-primary">Create</button>
+                <button onclick="closeModal('createModal')" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h2>Delete Board</h2>
+            <p>Are you sure? This can't be undone.</p>
+            <div class="modal-buttons">
+                <button id="confirmDelete" class="btn-danger">Delete</button>
+                <button onclick="closeModal('deleteModal')" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <!-- Rename Modal -->
+    <div id="renameModal" class="modal">
+        <div class="modal-content">
+            <h2>Rename Board</h2>
+            <input type="text" id="newBoardName" placeholder="New name" required>
+            <div class="modal-buttons">
+                <button onclick="renameBoard()" class="btn-primary">Rename</button>
+                <button onclick="closeModal('renameModal')" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script src="board-manager.js"></script>
+</body>
+</html>

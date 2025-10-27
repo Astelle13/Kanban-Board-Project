@@ -1,0 +1,53 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; color: #333; line-height: 1.6; }
+header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 2rem; text-align: center; }
+header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+header p { opacity: 0.9; }
+main { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+.actions { display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; }
+.btn-primary { background: #007bff; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
+.btn-primary:hover { background: #0056b3; }
+.btn-secondary { background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
+.btn-secondary:hover { background: #545b62; }
+.btn-danger { background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
+.btn-danger:hover { background: #c82333; }
+.btn-add { background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; margin-top: 1rem; }
+.btn-add:hover { background: #218838; }
+
+/* Board List */
+.board-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+.board-item { background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s; }
+.board-item:hover { transform: translateY(-2px); }
+.board-item h3 { margin-bottom: 0.5rem; color: #007bff; }
+.board-item button { margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+
+/* Kanban Stages */
+.kanban-container { display: flex; justify-content: center; gap: 1rem; padding: 1rem 0; }
+.stages { display: flex; gap: 2rem; overflow-x: auto; max-width: 100%; }
+.stage { background: white; border-radius: 8px; padding: 1rem; min-width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: box-shadow 0.2s; }
+.stage:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.stage h2 { margin-bottom: 1rem; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 0.5rem; }
+.count { background: #007bff; color: white; border-radius: 50%; padding: 0.2rem 0.5rem; font-size: 0.8rem; margin-left: 0.5rem; }
+.tasks { min-height: 200px; list-style: none; padding: 0; margin-bottom: 1rem; }
+.task { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 0.75rem; margin-bottom: 0.5rem; cursor: grab; transition: all 0.2s; position: relative; }
+.task:hover { background: #e9ecef; transform: translateY(-1px); }
+.task.dragging { opacity: 0.5; transform: rotate(5deg); }
+.high { border-left: 4px solid #dc3545; }
+.medium { border-left: 4px solid #ffc107; }
+.low { border-left: 4px solid #28a745; }
+.task .priority { font-weight: bold; color: #6c757d; }
+
+/* Modals */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
+.modal-content { background: white; margin: 15% auto; padding: 2rem; border-radius: 8px; width: 80%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.modal h2 { margin-bottom: 1rem; }
+.modal input, .modal textarea, .modal select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #dee2e6; border-radius: 5px; }
+.modal-buttons { display: flex; gap: 1rem; justify-content: flex-end; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Search/Filter */
+.search-section { display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; }
+.search-section input, .search-section select { padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 5px; }
+
+/* Responsive */
+@media (max-width: 768px) { .stages { flex-direction: column; } .kanban-container { padding: 0; } }

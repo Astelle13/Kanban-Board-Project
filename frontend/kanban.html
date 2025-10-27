@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Board</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 id="boardTitle">Kanban Board</h1>
+        <nav>
+            <button onclick="backToManager()" class="btn-secondary">← Back to Boards</button>
+            <button onclick="openRenameModal()" class="btn-secondary">Rename Board</button>
+            <button onclick="openDeleteModal()" class="btn-danger">Delete Board</button>
+            <button onclick="refreshBoard()" class="btn-secondary">Refresh</button>
+        </nav>
+    </header>
+    <main class="kanban-container">
+        <section class="stages">
+            <div class="stage" id="to-do" data-stage="TO-DO" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h2>To Do <span class="count" id="to-do-count"></span></h2>
+                <ul class="tasks" id="to-do-tasks"></ul>
+                <button onclick="openAddModal('TO-DO')" class="btn-add">+ Add Task</button>
+            </div>
+            <div class="stage" id="in-progress" data-stage="IN-PROGRESS" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h2>In Progress <span class="count" id="in-progress-count"></span></h2>
+                <ul class="tasks" id="in-progress-tasks"></ul>
+                <button onclick="openAddModal('IN-PROGRESS')" class="btn-add">+ Add Task</button>
+            </div>
+            <div class="stage" id="done" data-stage="DONE" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h2>Done <span class="count" id="done-count"></span></h2>
+                <ul class="tasks" id="done-tasks"></ul>
+                <button onclick="openAddModal('DONE')" class="btn-add">+ Add Task</button>
+            </div>
+        </section>
+    </main>
+    <!-- Add Task Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Task</h2>
+            <input type="text" id="taskTitle" placeholder="Title" required>
+            <textarea id="taskDesc" placeholder="Description"></textarea>
+            <input type="text" id="taskAssignee" placeholder="Assignee">
+            <select id="taskPriority">
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Low">Low</option>
+            </select>
+            <input type="text" id="taskDeps" placeholder="Dependencies (comma-separated IDs)">
+            <div class="modal-buttons">
+                <button onclick="addTask()" class="btn-primary">Add</button>
+                <button onclick="closeModal('addModal')" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Task Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Task</h2>
+            <input type="text" id="editTaskTitle" required>
+            <textarea id="editTaskDesc"></textarea>
+            <input type="text" id="editTaskAssignee">
+            <select id="editTaskPriority">
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Low">Low</option>
+            </select>
+            <input type="text" id="editTaskDeps" placeholder="Dependencies (comma-separated IDs)">
+            <div class="modal-buttons">
+                <button onclick="updateTask()" class="btn-primary">Update</button>
+                <button onclick="closeModal('editModal')" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <!-- Delete Task Modal -->
+    <div id="deleteTaskModal" class="modal">
+        <div class="modal-content">
+            <h2>Delete Task</h2>
+            <p>Are you sure?</p>
+            <div class="modal-buttons">
+                <button id="confirmDeleteTask" class="btn-danger">Delete</button>
+                <button onclick="closeModal('deleteTaskModal')" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <!-- Rename/Delete Board Modals (similar to index.html) -->
+    <div id="renameBoardModal" class="modal">
+        <div class="modal-content">
+            <h2>Rename Board</h2>
+            <input type="text" id="renameBoardName" required>
+            <div class="modal-buttons">
+                <button onclick="renameCurrentBoard()" class="btn-primary">Rename</button>
+                <button onclick="closeModal('renameBoardModal')" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div id="deleteBoardModal" class="modal">
+        <div class="modal-content">
+            <h2>Delete Board</h2>
+            <p>Are you sure? This can't be undone.</p>
+            <div class="modal-buttons">
+                <button id="confirmDeleteBoard" class="btn-danger">Delete</button>
+                <button onclick="closeModal('deleteBoardModal')" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <!-- Search/Filter Section -->
+    <section class="search-section">
+        <input type="text" id="searchInput" placeholder="Search tasks..." oninput="filterTasks()">
+        <select id="filterPriority" onchange="filterTasks()">
+            <option value="">All Priorities</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+        </select>
+    </section>
+    <script src="script.js"></script>
+    <script src="kanban.js"></script>
+</body>
+</html>
