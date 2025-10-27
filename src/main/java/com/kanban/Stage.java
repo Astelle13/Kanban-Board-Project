@@ -1,11 +1,11 @@
+// Updated Stage.java (add public iterator method for tasks)
 package com.kanban;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Iterator;
 
 public class Stage {
     private String name;
-    public Queue<Task> tasks = new LinkedList<>();  // Public for Board access if needed, but use methods
+    private CustomQueue<Task> tasks = new CustomQueue<>();  // Custom Queue
 
     public Stage(String name) {
         this.name = name;
@@ -20,8 +20,9 @@ public class Stage {
             System.out.println("No tasks.");
             return;
         }
-        for (Task t : tasks) {
-            System.out.println(t);
+        Iterator<Task> it = tasks.iterator();
+        while (it.hasNext()) {
+            System.out.println(it.next());
         }
     }
 
@@ -39,15 +40,11 @@ public class Stage {
     }
 
     public Task getTaskAtIndex(int index) {
-        if (index < 0 || index >= tasks.size()) {
+        CustomLinkedList<Task> list = tasks.getList();
+        if (index < 0 || index >= list.size()) {
             return null;
         }
-        Iterator<Task> it = tasks.iterator();
-        Task current = null;
-        for (int i = 0; i <= index; i++) {
-            current = it.next();
-        }
-        return current;
+        return list.get(index);
     }
 
     public String getName() {
@@ -55,34 +52,21 @@ public class Stage {
     }
 
     public Task removeTaskAtIndex(int index) {
-        if (index < 0 || index >= tasks.size()) {
+        CustomLinkedList<Task> list = tasks.getList();
+        if (index < 0 || index >= list.size()) {
             return null;
         }
-
-        Iterator<Task> it = tasks.iterator();
-        Task removed = null;
-        int currentIndex = 0;
-
-        while (it.hasNext()) {
-            Task t = it.next();
-            if (currentIndex == index) {
-                removed = t;
-                it.remove();
-                break;
-            }
-            currentIndex++;
-        }
-
+        Task removed = list.get(index);
+        list.remove(removed);
         return removed;
     }
 
     public int findTaskIndex(String id) {
-        int index = 0;
-        for (Task t : tasks) {
-            if (t.getId().equals(id)) {
-                return index;
+        CustomLinkedList<Task> list = tasks.getList();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(id)) {
+                return i;
             }
-            index++;
         }
         return -1;
     }
@@ -97,12 +81,19 @@ public class Stage {
         return false;
     }
 
+    // Public method for task iterator
+    public Iterator<Task> taskIterator() {
+        return tasks.iterator();
+    }
+
     // Search by keyword
     public void searchByKeyword(String keyword) {
         keyword = keyword.toLowerCase();
-        List<Task> results = new ArrayList<>();
+        CustomArrayList<Task> results = new CustomArrayList<>();
 
-        for (Task t : tasks) {
+        Iterator<Task> it = tasks.iterator();
+        while (it.hasNext()) {
+            Task t = it.next();
             if (t.getTitle().toLowerCase().contains(keyword) ||
                 t.getDescription().toLowerCase().contains(keyword)) {
                 results.add(t);
@@ -120,12 +111,14 @@ public class Stage {
         }
     }
 
-    // Filter by priority (High / Medium / Low)
+    // Filter by priority
     public void filterByPriority(String priority) {
-        priority = priority.toLowerCase(); // for case-insensitive match
-        List<Task> results = new ArrayList<>();
+        priority = priority.toLowerCase();
+        CustomArrayList<Task> results = new CustomArrayList<>();
 
-        for (Task t : tasks) {
+        Iterator<Task> it = tasks.iterator();
+        while (it.hasNext()) {
+            Task t = it.next();
             if (t.getPriority().toLowerCase().equals(priority)) {
                 results.add(t);
             }
@@ -145,9 +138,11 @@ public class Stage {
     // Filter by assignee
     public void filterByAssignee(String assignee) {
         assignee = assignee.toLowerCase();
-        List<Task> results = new ArrayList<>();
+        CustomArrayList<Task> results = new CustomArrayList<>();
 
-        for (Task t : tasks) {
+        Iterator<Task> it = tasks.iterator();
+        while (it.hasNext()) {
+            Task t = it.next();
             if (t.getAssignee().toLowerCase().contains(assignee)) {
                 results.add(t);
             }
@@ -168,8 +163,17 @@ public class Stage {
     public void saveToFile(String filename) {
         try {
             java.io.FileWriter writer = new java.io.FileWriter(filename, true); // append mode
-            for (Task t : tasks) {
-                String depsStr = t.getDependencies().stream().collect(Collectors.joining(","));
+            Iterator<Task> it = tasks.iterator();
+            while (it.hasNext()) {
+                Task t = it.next();
+                String depsStr = "";
+                Iterator<String> depIt = t.getDependencies().iterator();
+                if (depIt.hasNext()) {
+                    depsStr = depIt.next();
+                    while (depIt.hasNext()) {
+                        depsStr += "," + depIt.next();
+                    }
+                }
                 writer.write(name + "|" + t.getId() + "|" + t.getTitle() + "|" + t.getDescription() + "|" +
                             t.getPriority() + "|" + t.getAssignee() + "|" + t.getStatus().name() + "|" + depsStr + "\n");
             }
@@ -185,7 +189,7 @@ public class Stage {
             java.io.File file = new java.io.File(filename);
             if (!file.exists()) return; // no data yet
 
-            tasks.clear(); // Clear existing
+            tasks = new CustomQueue<>(); // Clear existing
             java.util.Scanner reader = new java.util.Scanner(file);
             while (reader.hasNextLine()) {
                 String line = reader.nextLine();
@@ -200,7 +204,10 @@ public class Stage {
                     t.setStatus(parts[6]);
                     if (parts.length > 7 && !parts[7].isEmpty()) {
                         String[] depParts = parts[7].split(",");
-                        List<String> deps = Arrays.asList(depParts);
+                        CustomLinkedList<String> deps = new CustomLinkedList<>();
+                        for (String d : depParts) {
+                            deps.add(d);
+                        }
                         t.setDependencies(deps);
                     }
                     tasks.offer(t);

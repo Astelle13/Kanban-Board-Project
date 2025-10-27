@@ -1,12 +1,14 @@
+// Updated Board.java (fix typo in TaskStatus.COMPLETED)
 package com.kanban;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
 
 public class Board {
     private String name;
-    private HashMap<String, Stage> stages = new HashMap<>();
-    private HashMap<String, Task> allTasks = new HashMap<>();
-    private PriorityQueue<Task> priQ = new PriorityQueue<>(new TaskComparator());
+    private CustomHashMap<String, Stage> stages = new CustomHashMap<>();
+    private CustomHashMap<String, Task> allTasks = new CustomHashMap<>();
+    private CustomPriorityQueue<Task> priQ = new CustomPriorityQueue<>(new TaskComparator());
 
     public Board(String name) {
         this.name = name;
@@ -16,7 +18,7 @@ public class Board {
     }
 
     // Create and add task to stage
-    public void createAndAddTask(String title, String desc, String assignee, String priority, String stageName, List<String> deps) {
+    public void createAndAddTask(String title, String desc, String assignee, String priority, String stageName, CustomLinkedList<String> deps) {
         if (!stages.containsKey(stageName)) {
             System.out.println("Invalid stage.");
             return;
@@ -64,7 +66,9 @@ public class Board {
     public boolean canMoveTask(String taskId) {
         Task t = allTasks.get(taskId);
         if (t == null) return false;
-        for (String depId : t.getDependencies()) {
+        Iterator<String> it = t.getDependencies().iterator();
+        while (it.hasNext()) {
+            String depId = it.next();
             Task dep = allTasks.get(depId);
             if (dep == null || dep.getStatus() != TaskStatus.COMPLETED) {
                 return false;
@@ -74,26 +78,44 @@ public class Board {
     }
 
     private TaskStatus getStatusForStage(String stage) {
-        switch (stage) {
-            case "TO-DO": return TaskStatus.PENDING;
-            case "IN-PROGRESS": return TaskStatus.IN_PROGRESS;
-            case "DONE": return TaskStatus.COMPLETED;
-            default: return TaskStatus.PENDING;
-        }
+        if ("TO-DO".equals(stage)) return TaskStatus.PENDING;
+        if ("IN-PROGRESS".equals(stage)) return TaskStatus.IN_PROGRESS;
+        if ("DONE".equals(stage)) return TaskStatus.COMPLETED;
+        return TaskStatus.PENDING;
     }
 
     // Get high priority snapshot (restore queue after)
-    public List<Task> getHighPriorityTasks() {
-        List<Task> high = new ArrayList<>();
-        PriorityQueue<Task> temp = new PriorityQueue<>(priQ);
-        while (!temp.isEmpty()) {
-            high.add(temp.poll());
+    public CustomArrayList<Task> getHighPriorityTasks() {
+        CustomArrayList<Task> high = new CustomArrayList<>();
+        CustomPriorityQueue<Task> temp = new CustomPriorityQueue<>(priQ.comparator);
+        while (!priQ.isEmpty()) {
+            high.add(priQ.poll());
         }
-        // Restore
-        for (Task h : high) {
-            priQ.offer(h);
+        // Restore (simplified, in practice re-offer from allTasks high pri)
+        Iterator<Task> it = getAllTasksIterator();
+        while (it.hasNext()) {
+            Task tt = it.next();
+            if ("High".equals(tt.getPriority())) {
+                priQ.offer(tt);
+            }
         }
         return high;
+    }
+
+    // Helper for allTasks iterator
+    private Iterator<Task> getAllTasksIterator() {
+        return new Iterator<Task>() {
+            Iterator<Task> it = allTasks.valuesIterator();  // Now correct type
+            public boolean hasNext() {
+                return it.hasNext();
+            }
+            public Task next() {
+                return it.next();
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     // Add to priQ if high (for updates)
@@ -113,33 +135,89 @@ public class Board {
         return stages.get(stageName);
     }
 
-    public List<Stage> getAllStages() {
-        return new ArrayList<>(stages.values());
+    public CustomArrayList<Stage> getAllStages() {
+        CustomArrayList<Stage> stageList = new CustomArrayList<>();
+        Iterator<Stage> it = new Iterator<Stage>() {
+            Iterator<Stage> rawIt = stages.valuesIterator();  // Correct type
+            public boolean hasNext() {
+                return rawIt.hasNext();
+            }
+            public Stage next() {
+                return rawIt.next();
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+        while (it.hasNext()) {
+            stageList.add(it.next());
+        }
+        return stageList;
     }
 
-    public List<String> getStageKeys() {
-        return new ArrayList<>(stages.keySet());
+    public CustomArrayList<String> getStageKeys() {
+        CustomArrayList<String> keys = new CustomArrayList<>();
+        Iterator<String> it = new Iterator<String>() {
+            Iterator<String> rawIt = stages.keySetIterator();  // Correct type
+            public boolean hasNext() {
+                return rawIt.hasNext();
+            }
+            public String next() {
+                return rawIt.next();
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+        while (it.hasNext()) {
+            keys.add(it.next());
+        }
+        return keys;
     }
 
     public void save(String filename) {
         try {
             new java.io.FileWriter(filename).close(); // Clear file
         } catch (Exception e) {}
-        for (Stage s : stages.values()) {
+        Iterator<Stage> it = getAllStagesIterator();
+        while (it.hasNext()) {
+            Stage s = it.next();
             s.saveToFile(filename);
         }
         System.out.println("Board saved.");
     }
 
+    // Helper for stages iterator
+    private Iterator<Stage> getAllStagesIterator() {
+        return new Iterator<Stage>() {
+            Iterator<Stage> rawIt = stages.valuesIterator();  // Correct type
+            public boolean hasNext() {
+                return rawIt.hasNext();
+            }
+            public Stage next() {
+                return rawIt.next();
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
     public void load(String filename) {
         allTasks.clear();
-        priQ.clear();
-        for (Stage s : stages.values()) {
+        priQ = new CustomPriorityQueue<>(new TaskComparator());
+        Iterator<Stage> it = getAllStagesIterator();
+        while (it.hasNext()) {
+            Stage s = it.next();
             s.loadFromFile(filename);
         }
         // Rebuild allTasks and priQ
-        for (Stage s : stages.values()) {
-            for (Task t : s.tasks) {
+        it = getAllStagesIterator();
+        while (it.hasNext()) {
+            Stage s = it.next();
+            Iterator<Task> taskIt = s.taskIterator();
+            while (taskIt.hasNext()) {
+                Task t = taskIt.next();
                 allTasks.put(t.getId(), t);
                 if ("High".equals(t.getPriority())) {
                     priQ.offer(t);

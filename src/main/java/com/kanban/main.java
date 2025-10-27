@@ -1,6 +1,7 @@
+// Updated Main.java (add import for Scanner)
 package com.kanban;
 
-import java.util.*;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
@@ -128,7 +129,13 @@ public class Main {
                     String priority = getPriorityFromChoice(priChoice);
                     System.out.print("Dependencies (comma-sep IDs or none): ");
                     String depsInput = sc.nextLine();
-                    List<String> deps = depsInput.isEmpty() ? new LinkedList<>() : Arrays.asList(depsInput.split(","));
+                    CustomLinkedList<String> deps = new CustomLinkedList<>();
+                    if (!depsInput.isEmpty()) {
+                        String[] depParts = depsInput.split(",");
+                        for (String d : depParts) {
+                            deps.add(d.trim());
+                        }
+                    }
                     System.out.println("Select Stage: 1. TO-DO 2. IN-PROGRESS 3. DONE");
                     int stageChoice = sc.nextInt();
                     sc.nextLine();
@@ -137,7 +144,9 @@ public class Main {
                     break;
                 case 2:
                     System.out.println("\n--- All Tasks ---");
-                    for (String key : board.getStageKeys()) {
+                    CustomArrayList<String> keys = board.getStageKeys();
+                    for (int i = 0; i < keys.size(); i++) {
+                        String key = keys.get(i);
                         Stage s = board.getStage(key);
                         System.out.println("\n" + key + ":");
                         s.showAllTasks();
@@ -239,24 +248,24 @@ public class Main {
                     System.out.println("1. Keyword 2. Priority 3. Assignee");
                     int searchChoice = sc.nextInt();
                     sc.nextLine();
-                    List<Stage> allStages = board.getAllStages();
+                    CustomArrayList<Stage> allStages = board.getAllStages();
                     if (searchChoice == 1) {
                         System.out.print("Keyword: ");
                         String keyword = sc.nextLine();
-                        for (Stage s : allStages) {
-                            s.searchByKeyword(keyword);
+                        for (int i = 0; i < allStages.size(); i++) {
+                            allStages.get(i).searchByKeyword(keyword);
                         }
                     } else if (searchChoice == 2) {
                         System.out.print("Priority (High/Medium/Low): ");
                         String pr = sc.nextLine();
-                        for (Stage s : allStages) {
-                            s.filterByPriority(pr);
+                        for (int i = 0; i < allStages.size(); i++) {
+                            allStages.get(i).filterByPriority(pr);
                         }
                     } else if (searchChoice == 3) {
                         System.out.print("Assignee: ");
                         String assigneeFilter = sc.nextLine();
-                        for (Stage s : allStages) {
-                            s.filterByAssignee(assigneeFilter);
+                        for (int i = 0; i < allStages.size(); i++) {
+                            allStages.get(i).filterByAssignee(assigneeFilter);
                         }
                     } else {
                         System.out.println("Invalid.");
@@ -264,7 +273,7 @@ public class Main {
                     break;
                 case 7:
                     System.out.println("\n--- Urgent Tasks ---");
-                    List<Task> urgents = board.getHighPriorityTasks();
+                    CustomArrayList<Task> urgents = board.getHighPriorityTasks();
                     if (urgents.isEmpty()) {
                         System.out.println("No high priority tasks.");
                     } else {

@@ -1,11 +1,7 @@
+// Updated Task.java (add import for Iterator)
 package com.kanban;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.Iterator;
 
 public class Task {
     private String id;
@@ -14,31 +10,35 @@ public class Task {
     private String assignee;
     private String priority;  // "High", "Medium", "Low"
     private TaskStatus status; // PENDING, IN_PROGRESS, COMPLETED
-    private LinkedList<String> dependencies = new LinkedList<>(); // For dependency tracking
+    private CustomLinkedList<String> dependencies = new CustomLinkedList<>(); // For dependency tracking
 
     // No-arg constructor (for serialization/loading)
     public Task() {}
 
     // Constructor (default priority + pending status + empty deps)
     public Task(String title, String description, String assignee) {
-        this.id = UUID.randomUUID().toString();
+        this.id = java.util.UUID.randomUUID().toString(); // Keep UUID, as it's utility
         this.title = title;
         this.description = description;
         this.assignee = assignee;
         this.priority = "Medium"; // default
         this.status = TaskStatus.PENDING;
-        this.dependencies = new LinkedList<>();
     }
 
     // Constructor with priority and deps
-    public Task(String title, String description, String assignee, String priority, List<String> deps) {
-        this.id = UUID.randomUUID().toString();
+    public Task(String title, String description, String assignee, String priority, CustomLinkedList<String> deps) {
+        this.id = java.util.UUID.randomUUID().toString();
         this.title = title;
         this.description = description;
         this.assignee = assignee;
         setPriority(priority);
         this.status = TaskStatus.PENDING;
-        this.dependencies = new LinkedList<>(deps != null ? deps : Collections.emptyList());
+        if (deps != null) {
+            Iterator<String> it = deps.iterator();
+            while (it.hasNext()) {
+                this.dependencies.add(it.next());
+            }
+        }
     }
 
     // Getters
@@ -48,7 +48,14 @@ public class Task {
     public String getAssignee() { return assignee; }
     public String getPriority() { return priority; }
     public TaskStatus getStatus() { return status; }
-    public List<String> getDependencies() { return new ArrayList<>(dependencies); }
+    public CustomLinkedList<String> getDependencies() {
+        CustomLinkedList<String> copy = new CustomLinkedList<>();
+        Iterator<String> it = dependencies.iterator();
+        while (it.hasNext()) {
+            copy.add(it.next());
+        }
+        return copy;
+    }
 
     // Setters
     public void setId(String id) { this.id = id; }
@@ -56,39 +63,56 @@ public class Task {
     public void setDescription(String description) { this.description = description; }
     public void setAssignee(String assignee) { this.assignee = assignee; }
     public void setPriority(String priority) {
-        if (!Arrays.asList("High", "Medium", "Low").contains(priority)) {
-            throw new IllegalArgumentException("Priority must be High, Medium, or Low.");
+        String[] priorities = {"High", "Medium", "Low"};
+        for (String p : priorities) {
+            if (p.equals(priority)) {
+                this.priority = priority;
+                return;
+            }
         }
-        this.priority = priority;
+        throw new IllegalArgumentException("Priority must be High, Medium, or Low.");
     }
     public void setStatus(String statusStr) {
-        try {
-            this.status = TaskStatus.valueOf(statusStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            this.status = TaskStatus.PENDING;
-        }
+        if ("PENDING".equals(statusStr)) this.status = TaskStatus.PENDING;
+        else if ("IN_PROGRESS".equals(statusStr)) this.status = TaskStatus.IN_PROGRESS;
+        else if ("COMPLETED".equals(statusStr)) this.status = TaskStatus.COMPLETED;
+        else this.status = TaskStatus.PENDING;
     }
     public void setStatus(TaskStatus status) { this.status = status; }
-    public void setDependencies(List<String> deps) {
-        this.dependencies = new LinkedList<>(deps != null ? deps : Collections.emptyList());
+    public void setDependencies(CustomLinkedList<String> deps) {
+        dependencies.clear();
+        if (deps != null) {
+            Iterator<String> it = deps.iterator();
+            while (it.hasNext()) {
+                dependencies.add(it.next());
+            }
+        }
     }
 
     // Helper for priority number (High=1 highest, for PriorityQueue min-heap)
     public int getPriorityNum() {
-        switch (priority) {
-            case "High": return 1;
-            case "Medium": return 2;
-            case "Low": return 3;
-            default: return 3;
-        }
+        if ("High".equals(priority)) return 1;
+        if ("Medium".equals(priority)) return 2;
+        return 3;
     }
 
     // Display
     @Override
     public String toString() {
+        String depsStr = "";
+        Iterator<String> it = dependencies.iterator();
+        if (it.hasNext()) {
+            depsStr = ", Deps: [";
+            boolean first = true;
+            while (it.hasNext()) {
+                if (!first) depsStr += ", ";
+                depsStr += it.next();
+                first = false;
+            }
+            depsStr += "]";
+        }
         return "[" + priority + "] " + title + " - " + description +
-               " (Assignee: " + assignee + ", Status: " + status + 
-               (dependencies.isEmpty() ? "" : ", Deps: " + dependencies) + ")";
+               " (Assignee: " + assignee + ", Status: " + status + depsStr + ")";
     }
 }
 

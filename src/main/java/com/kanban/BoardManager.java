@@ -1,11 +1,11 @@
+// Updated BoardManager.java (fix iterator type)
 package com.kanban;
 
+import java.util.Iterator;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 public class BoardManager {
-    private static Map<String, Board> boards = new HashMap<>();
+    private static CustomHashMap<String, Board> boards = new CustomHashMap<>();
 
     public static void createBoard(String name) {
         if (boards.containsKey(name)) {
@@ -22,8 +22,20 @@ public class BoardManager {
             return;
         }
         System.out.println("Available Boards:");
-        for (String boardName : boards.keySet()) {
-            System.out.println("- " + boardName);
+        Iterator<String> it = new Iterator<String>() {
+            Iterator<String> rawIt = boards.keySetIterator();  // Correct type
+            public boolean hasNext() {
+                return rawIt.hasNext();
+            }
+            public String next() {
+                return rawIt.next();
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+        while (it.hasNext()) {
+            System.out.println("- " + it.next());
         }
     }
 
