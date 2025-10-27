@@ -1,14 +1,11 @@
 package com.kanban;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.ArrayList; // Add this import
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Stage {
     private String name;
-    private Queue<Task> tasks = new LinkedList<>();
+    public Queue<Task> tasks = new LinkedList<>();  // Public for Board access if needed, but use methods
 
     public Stage(String name) {
         this.name = name;
@@ -77,6 +74,17 @@ public class Stage {
         }
 
         return removed;
+    }
+
+    public int findTaskIndex(String id) {
+        int index = 0;
+        for (Task t : tasks) {
+            if (t.getId().equals(id)) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
     }
 
     public boolean deleteTaskAtIndex(int index) {
@@ -153,6 +161,54 @@ public class Stage {
                 Task t = results.get(i);
                 System.out.println((i + 1) + ". " + t.getTitle() + " (Priority: " + t.getPriority() + ")");
             }
+        }
+    }
+
+    // Save all tasks in this stage to a file
+    public void saveToFile(String filename) {
+        try {
+            java.io.FileWriter writer = new java.io.FileWriter(filename, true); // append mode
+            for (Task t : tasks) {
+                String depsStr = t.getDependencies().stream().collect(Collectors.joining(","));
+                writer.write(name + "|" + t.getId() + "|" + t.getTitle() + "|" + t.getDescription() + "|" +
+                            t.getPriority() + "|" + t.getAssignee() + "|" + t.getStatus().name() + "|" + depsStr + "\n");
+            }
+            writer.close();
+        } catch (Exception e) {
+            System.out.println("Error saving tasks for stage " + name + ": " + e.getMessage());
+        }
+    }
+
+    // Load tasks for this stage from file
+    public void loadFromFile(String filename) {
+        try {
+            java.io.File file = new java.io.File(filename);
+            if (!file.exists()) return; // no data yet
+
+            tasks.clear(); // Clear existing
+            java.util.Scanner reader = new java.util.Scanner(file);
+            while (reader.hasNextLine()) {
+                String line = reader.nextLine();
+                String[] parts = line.split("\\|");
+                if (parts.length >= 7 && parts[0].equals(name)) { // >=7 for optional deps
+                    Task t = new Task(); // no-arg
+                    t.setId(parts[1]);
+                    t.setTitle(parts[2]);
+                    t.setDescription(parts[3]);
+                    t.setPriority(parts[4]);
+                    t.setAssignee(parts[5]);
+                    t.setStatus(parts[6]);
+                    if (parts.length > 7 && !parts[7].isEmpty()) {
+                        String[] depParts = parts[7].split(",");
+                        List<String> deps = Arrays.asList(depParts);
+                        t.setDependencies(deps);
+                    }
+                    tasks.offer(t);
+                }
+            }
+            reader.close();
+        } catch (Exception e) {
+            System.out.println("Error loading tasks for stage " + name + ": " + e.getMessage());
         }
     }
 }
